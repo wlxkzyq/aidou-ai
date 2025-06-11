@@ -52,6 +52,16 @@ class ThreadPoolManager:
         try:
             loop = asyncio.get_event_loop()
             logger.info('event loop {}', loop)
+            # 添加事件循环状态检查
+            logger.info('event loop running status1: {}', loop.is_running())
+            if not loop.is_running():
+                loop = asyncio.new_event_loop()
+                thread_event = threading.Thread(target=self.start_loop, args=(loop, ))
+                thread_event.start()
+                logger.info('Creating new event loop {}', loop)
+                # 等待事件循环真正启动
+                while not loop.is_running():
+                    time.sleep(0.1)
         except Exception:
             loop = asyncio.new_event_loop()
             thread_event = threading.Thread(target=self.start_loop, args=(loop, ))
